@@ -10,7 +10,7 @@ import (
 func DownloadFromS3(filename string) string {
   svc := s3.New(session.New())
   input := &s3.GetObjectInput{
-    Bucket: aws.String("ConcertScraper"),
+    Bucket: aws.String("concertscraper"),
     Key:    aws.String(filename),
   }
 
