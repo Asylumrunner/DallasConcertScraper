@@ -7,14 +7,25 @@ import (
   "log"
 )
 
-func scrape(url string) []string {
+type information_type int
+
+const (
+  headliner information_type = 0 + iota
+  doors_time
+  show_time
+  openers
+  date
+  none
+)
+
+func scrape(url string) []show {
   log.Print("Creating HTTP Client with a 30 second timeout")
   client := &http.Client{
     Timeout: 30 * time.Second,
   }
 
   log.Print("Performing GET call on " + url)
-  response, err := client.Get("http://www.treesdallas.com/listing/")
+  response, err := client.Get(url)
   defer response.Body.Close()
   if err != nil {
     log.Fatal(err)
@@ -23,33 +34,68 @@ func scrape(url string) []string {
   response.Body.Read(body)
   log.Print(string(body))
 
-  band_names := make([]string, 0)
+  band_names := make([]show, 0)
   tokenizer := html.NewTokenizer(response.Body)
-  band_name_expected := false
+  var data_expected information_type
+
   end_of_document_found := false
   var t html.Token
+  var new_show show
+
   for {
     token := tokenizer.Next()
+
     switch {
-    case token == html.ErrorToken:
-      log.Print("Found end of HTML document. Closing")
-      end_of_document_found = true
-    case token == html.StartTagToken:
-      t = tokenizer.Token()
-      isH1 := t.Data == "h1"
-      if isH1 {
-        log.Print("Found H1 header tag. Checking class")
-        ok, value := grabAttribute(t, "class")
-        if ok && value == "headliners summary" {
-          log.Print("Headliner tag found. Preparing to collect band name")
-          band_name_expected = true
-        }
-      }
-    case token == html.TextToken && band_name_expected:
+
+      case token == html.ErrorToken:
+        log.Print("Found end of HTML document. Closing")
+        end_of_document_found = true
+
+      case token == html.StartTagToken:
         t = tokenizer.Token()
-        band_names = append(band_names, t.Data)
+        if t.Data == "h1" {
+          log.Print("Found H1 header tag. Checking class")
+          ok, value := grabAttribute(t, "class")
+          if ok && value == "headliners summary" {
+            log.Print("Headliner tag found. Preparing to collect show details")
+            data_expected = headliner
+            band_names = append(band_names, new_show)
+            new_show = show{}
+          }
+          if ok && value == "headliners" {
+            data_expected = headliner
+          }
+        } else if t.Data == "h2" {
+          log.Print("Found H2 header tag. Checking class")
+          ok, value := grabAttribute(t, "class")
+          log.Print("Class for header: " + value)
+          if ok && value == "supports description"{
+            data_expected = openers
+          } else if ok && value == "dates" {
+            data_expected = date
+          }
+        }
+
+      case token == html.TextToken && data_expected == headliner:
+        t = tokenizer.Token()
+        //band_names = append(band_names, t.Data)
+        if new_show.headliner == "" {
+          new_show.headliner = t.Data
+        } else {
+          new_show.headliner += (", " + t.Data)
+        }
         log.Print("Band name " + t.Data + " found. Appending to list")
-        band_name_expected = false
+        data_expected = none
+
+      case token == html.TextToken && data_expected == openers:
+        t = tokenizer.Token()
+        new_show.openers = t.Data
+        data_expected = none
+
+      case token == html.TextToken && data_expected == date:
+        t = tokenizer.Token()
+        new_show.date = t.Data
+        data_expected = none
     }
     if end_of_document_found {
       break

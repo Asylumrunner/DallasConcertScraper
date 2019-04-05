@@ -5,6 +5,7 @@ import (
     "github.com/aws/aws-sdk-go/aws/session"
     "github.com/aws/aws-sdk-go/service/s3"
     "log"
+    "bytes"
 )
 
 func DownloadFromS3(filename string) string {
@@ -25,9 +26,29 @@ func DownloadFromS3(filename string) string {
   log.Print("Object recieved successfully")
 
   var body []byte
-  body = make([]byte, 9999)
+  body = make([]byte, *result.ContentLength)
   result.Body.Read(body)
 
   log.Print("Object read successfully: " + string(body))
   return string(body)
+}
+
+func UploadToS3(file_body string) bool {
+  svc := s3.New(session.New())
+  log.Print("Established S3 session")
+
+  output := &s3.PutObjectInput{
+    Bucket: aws.String("concertscraper"),
+    Key:    aws.String("Scraped_Shows.txt"),
+    Body:   bytes.NewReader([]byte(file_body)),
+  }
+
+  _, err := svc.PutObject(output)
+  if err != nil {
+    log.Print("An error occured when uploading the object to S3")
+    log.Print(err.Error())
+    return false
+  }
+  log.Print("Object uploaded successfully")
+  return true
 }

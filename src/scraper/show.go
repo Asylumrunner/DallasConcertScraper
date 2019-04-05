@@ -5,8 +5,9 @@ import "time"
 type show struct {
   headliner string
   venue string
+  date string
   doors time.Time
   show time.Time
-  openers []string
+  openers string
   description string
 }

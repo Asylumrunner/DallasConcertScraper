@@ -10,14 +10,14 @@ func main() {
   lambda.Start(ScrapeAndParse)
 }
 
-func getVenues() []string {
+func getShows() []show {
   log.Print("Downloading venue list from S3!")
   venue_list_b := DownloadFromS3("venues.txt")
   log.Print("Venue list downloaded")
 
   log.Print("Formatting venue list and preparing for scraping")
   venue_list := strings.Split(venue_list_b, ",")
-  act_list := make([]string, 0)
+  act_list := make([]show, 0)
 
   var trimmed_venue string
   for _, venue := range venue_list {
@@ -30,9 +30,12 @@ func getVenues() []string {
 }
 
 func ScrapeAndParse() {
-  log.Print("Lambda function has spun up!")
-  venues := getVenues()
-  for _, act := range venues {
-    log.Print("Act found: " + act)
+  log.Print("Lambd function has spun up!")
+  shows := getShows()
+  formatted_show_document := FormatScrapedData(shows)
+  log.Print(formatted_show_document)
+  uploaded_successfully := UploadToS3(formatted_show_document)
+  if uploaded_successfully {
+    log.Print("File uploaded to S3. Ceasing execution")
   }
 }
