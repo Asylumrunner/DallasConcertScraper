@@ -12,6 +12,33 @@ func SendEmail(email_body string) bool {
 	log.Print("Established SES session")
 
 	input := &ses.SendEmailInput{
-		
+		Destination: &ses.Destination{
+			ToAddresses: []*string{aws.String("asylumrunner@gmail.com")},
+		},
+		Message: &ses.Message{
+			Body: &ses.Body{
+				Html: &ses.Content{
+					Data: aws.String(email_body),
+				},
+			},
+			Subject: &ses.Content{
+				Data: aws.String("Your Scraped Concert Information Is Ready"),
+			},
+		},
+		Source: aws.String("asylumrunner@gmail.com"),
+		ReplyToAddresses: []*string{
+			aws.String(asylumrunner@gmail.com),
+		},
 	}
+
+	_, err := svc.SendEmail(input)
+
+	if err != nil {
+		log.Print("An error occurred trying to send an email")
+    	log.Print(err.Error())
+    	return false
+	}
+
+	log.Print("Email sent successfully")
+	return true
 }

@@ -11,6 +11,10 @@ func main() {
 }
 
 func getShows() []show {
+  spotifyAuthResponse := getSpotifyAuth()
+  if spotifyAuthResponse != '' {
+    log.Print("Got something from Spotify!")
+  }
   log.Print("Downloading venue list from S3!")
   venue_list_b := DownloadFromS3("venues.txt")
   log.Print("Venue list downloaded")
