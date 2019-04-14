@@ -12,7 +12,7 @@ func main() {
 
 func getShows() []show {
   spotifyAuthResponse := getSpotifyAuth()
-  if spotifyAuthResponse != '' {
+  if spotifyAuthResponse != "" {
     log.Print("Got something from Spotify!")
   }
   log.Print("Downloading venue list from S3!")
@@ -34,7 +34,7 @@ func getShows() []show {
 }
 
 func ScrapeAndParse() {
-  log.Print("Lambd function has spun up!")
+  log.Print("Lambda function has spun up!")
   shows := getShows()
   formatted_show_document := FormatScrapedData(shows)
   log.Print(formatted_show_document)

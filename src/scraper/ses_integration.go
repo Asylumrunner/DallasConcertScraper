@@ -1,11 +1,11 @@
 package main
 
-import {
+import (
 	"github.com/aws/aws-sdk-go/aws"
     "github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ses"
 	"log"
-}
+)
 
 func SendEmail(email_body string) bool {
 	svc := ses.New(session.New())
@@ -27,7 +27,7 @@ func SendEmail(email_body string) bool {
 		},
 		Source: aws.String("asylumrunner@gmail.com"),
 		ReplyToAddresses: []*string{
-			aws.String(asylumrunner@gmail.com),
+			aws.String("asylumrunner@gmail.com"),
 		},
 	}
 
