@@ -22,7 +22,6 @@ func getSpotifyAuth() string {
 	req, _ := http.NewRequest("POST", "https://accounts.spotify.com/api/token", auth_request_body)
 	auth_payload := []byte(os.Getenv("client_id") + ":" + os.Getenv("client_secret"))
 	encoded_auth_payload := base64.StdEncoding.EncodeToString(auth_payload)
-	log.Print("Encoded auth payload: " + encoded_auth_payload)
 	req.Header.Set("Authorization", "Basic " + encoded_auth_payload)
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	res, err := client.Do(req)
@@ -38,7 +37,6 @@ func getSpotifyAuth() string {
 
 func consumeAuthResponse(body []byte) *spotifyAuthResponse{
 	raw_response := string(body)
-	log.Print("Raw Spotify Response: " + raw_response)
 	newSpotifyAuthResponse := new(spotifyAuthResponse)
 	err := json.Unmarshal(body, &newSpotifyAuthResponse)
 	if err != nil {
