@@ -10,4 +10,5 @@ type show struct {
   show time.Time
   openers string
   description string
+  spotify_url string
 }

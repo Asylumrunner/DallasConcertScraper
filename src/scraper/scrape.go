@@ -54,10 +54,8 @@ func scrape(url string) []show {
       case token == html.StartTagToken:
         t = tokenizer.Token()
         if t.Data == "h1" {
-          log.Print("Found H1 header tag. Checking class")
           ok, value := grabAttribute(t, "class")
           if ok && value == "headliners summary" {
-            log.Print("Headliner tag found. Preparing to collect show details")
             data_expected = headliner
             band_names = append(band_names, new_show)
             new_show = show{}
@@ -66,9 +64,7 @@ func scrape(url string) []show {
             data_expected = headliner
           }
         } else if t.Data == "h2" {
-          log.Print("Found H2 header tag. Checking class")
           ok, value := grabAttribute(t, "class")
-          log.Print("Class for header: " + value)
           if ok && value == "supports description"{
             data_expected = openers
           } else if ok && value == "dates" {
@@ -106,13 +102,10 @@ func scrape(url string) []show {
 }
 
 func grabAttribute(token html.Token, attribute string) (bool, string) {
-  log.Print("Checking HTML token for attribute " + attribute)
   for _, value := range token.Attr {
     if value.Key == "class" {
-      log.Print(attribute + " attribute found!")
       return true, value.Val
     }
   }
-  log.Print(attribute + " attribute not found. Returning false.")
   return false, ""
 }

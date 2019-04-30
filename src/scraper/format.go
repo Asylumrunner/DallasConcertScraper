@@ -8,6 +8,9 @@ func FormatScrapedData(shows []show) string {
 		if single_show.openers != "" {
 			output_string += ("Openers: " + single_show.openers + "\n")
 		}
+		if single_show.spotify_url != "" {
+			output_string += ("Spotify Link: " + single_show.spotify_url + "\n")
+		}
 		output_string += "\n"
 	}
 	return output_string

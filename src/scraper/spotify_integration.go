@@ -8,12 +8,41 @@ import (
 	"log"
 	"io/ioutil"
 	"encoding/json"
+	"regexp"
 )
 
 type spotifyAuthResponse struct {
-	access_token string
-	token_type string
-	expires_in int
+	AccessToken string `json:"access_token"`
+	TokenType   string `json:"token_type"`
+	ExpiresIn   int    `json:"expires_in"`
+}
+
+type spotifySearchArtistsResponse struct {
+	Artists struct {
+		Href  string `json:"href"`
+		Items []struct {
+			ExternalUrls struct {
+				Spotify string `json:"spotify"`
+			} `json:"external_urls"`
+			Genres []interface{} `json:"genres"`
+			Href   string        `json:"href"`
+			ID     string        `json:"id"`
+			Images []struct {
+				Height int    `json:"height"`
+				URL    string `json:"url"`
+				Width  int    `json:"width"`
+			} `json:"images"`
+			Name       string `json:"name"`
+			Popularity int    `json:"popularity"`
+			Type       string `json:"type"`
+			URI        string `json:"uri"`
+		} `json:"items"`
+		Limit    int         `json:"limit"`
+		Next     interface{} `json:"next"`
+		Offset   int         `json:"offset"`
+		Previous interface{} `json:"previous"`
+		Total    int         `json:"total"`
+	} `json:"artists"`
 }
 
 func getSpotifyAuth() string {
@@ -32,19 +61,61 @@ func getSpotifyAuth() string {
 
 	body, err := ioutil.ReadAll(res.Body)
 	auth_response := consumeAuthResponse(body)
-	return auth_response.access_token
+	log.Print(*auth_response)
+	return auth_response.AccessToken
 }
 
 func consumeAuthResponse(body []byte) *spotifyAuthResponse{
-	raw_response := string(body)
-	newSpotifyAuthResponse := new(spotifyAuthResponse)
+	newSpotifyAuthResponse := spotifyAuthResponse{}
 	err := json.Unmarshal(body, &newSpotifyAuthResponse)
 	if err != nil {
 		log.Print("Couldn't unmarshal json response")
 	}
 
-	return newSpotifyAuthResponse
+	return &newSpotifyAuthResponse
 }
-/* func searchSpotifyForArtist (artist string) bool{
+
+func searchSpotifyForArtist(artist string, spotify_api_cred string) string{
+	client := &http.Client{}
+	req, _ := http.NewRequest("GET", "https://api.spotify.com/v1/search", nil)
+	req.Header.Set("Authorization", "Bearer "+ spotify_api_cred)
+
+	query := req.URL.Query()
+	query.Add("type", "artist")
+	cleanedArtistName := cleanEventName(artist)
+	query.Add("q", strings.Replace(cleanedArtistName, " ", "+", -1))
+	req.URL.RawQuery = query.Encode()
+
+	res, err := client.Do(req)
+	if err != nil {
+		log.Print("An error occured while trying to retrieve the artist from Spotify")
+		return ""
+	}
+	body, _ := ioutil.ReadAll(res.Body)
+	search_response := consumeSearchResponse(body)
+	if len(search_response.Artists.Items) > 0 {
+		return search_response.Artists.Items[0].ExternalUrls.Spotify
+	} else {
+		return ""
+	}
 	
-} */
+}
+
+func consumeSearchResponse(body []byte) *spotifySearchArtistsResponse{
+	newSpotifySearchResponse := spotifySearchArtistsResponse{}
+	err := json.Unmarshal(body, &newSpotifySearchResponse)
+	if err != nil {
+		log.Print("Couldn't unmarshal JSON response")
+	}
+	log.Print(newSpotifySearchResponse)
+	return &newSpotifySearchResponse
+}
+
+func cleanEventName(originalName string) string{
+	compiledExpression := regexp.Compile("^[^:]*")
+	//Grabs the substring occuring before the first colon, or the whole string if no colon is there
+	cleanedName := compiledExpression.Find([]byte(originalName))
+
+	cleanedName = strings.Replace(cleanedName, " On Tour", "", -1)
+	return cleanedName
+}
