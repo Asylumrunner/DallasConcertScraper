@@ -51,6 +51,11 @@ func ScrapeAndParse() {
   log.Print(formatted_show_document)
   uploaded_successfully := UploadToS3(formatted_show_document)
   if uploaded_successfully {
-    log.Print("File uploaded to S3. Ceasing execution")
+    log.Print("File uploaded to S3.")
+  }
+  html_formatted_show_document := FormatIntoHTMLBody(shows)
+  emailed_successfully := SendEmail(html_formatted_show_document)
+  if emailed_successfully {
+    log.Print("File successfully emailed. Ceasing execution")
   }
 }

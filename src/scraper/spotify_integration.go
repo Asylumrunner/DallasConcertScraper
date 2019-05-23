@@ -112,10 +112,10 @@ func consumeSearchResponse(body []byte) *spotifySearchArtistsResponse{
 }
 
 func cleanEventName(originalName string) string{
-	compiledExpression := regexp.Compile("^[^:]*")
+	compiledExpression, _ := regexp.Compile("^[^:]*")
 	//Grabs the substring occuring before the first colon, or the whole string if no colon is there
 	cleanedName := compiledExpression.Find([]byte(originalName))
 
-	cleanedName = strings.Replace(cleanedName, " On Tour", "", -1)
-	return cleanedName
+	finalizedName := strings.Replace(string(cleanedName), " On Tour", "", -1)
+	return finalizedName
 }

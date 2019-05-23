@@ -28,6 +28,9 @@ func FormatIntoHTMLBody(shows []show) string {
 		if single_show.openers != "" {
 			html_email_body += ("<p>Openers: " + single_show.openers + "</p>")
 		}
+		if single_show.spotify_url != "" {
+			html_email_body += ("<a href=\"" + single_show.spotify_url + "\">Spotify Link</a>")
+		}
 	}
 
 	return html_email_body
