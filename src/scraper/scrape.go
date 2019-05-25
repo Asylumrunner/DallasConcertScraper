@@ -59,6 +59,7 @@ func scrape(url string) []show {
             data_expected = headliner
             band_names = append(band_names, new_show)
             new_show = show{}
+            new_show.venue = url
           }
           if ok && value == "headliners" {
             data_expected = headliner

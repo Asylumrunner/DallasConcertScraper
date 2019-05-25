@@ -1,5 +1,13 @@
 package main
 
+func RemoveInvalidValues(shows []show) (cleaned_shows []show) {
+	for _, s := range shows {
+		if len(s.headliner) < 200 {
+			cleaned_shows = append(cleaned_shows, s)
+		}
+	}
+	return
+}
 func FormatScrapedData(shows []show) string {
 	var output_string string = ""
 	for _, single_show := range shows {

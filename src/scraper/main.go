@@ -46,6 +46,7 @@ func searchShowsOnSpotify(show_list []show) []show {
 func ScrapeAndParse() {
   log.Print("Lambda function has spun up!")
   shows := getShows()
+  shows = RemoveInvalidValues(shows)
   shows = searchShowsOnSpotify(shows)
   formatted_show_document := FormatScrapedData(shows)
   log.Print(formatted_show_document)
