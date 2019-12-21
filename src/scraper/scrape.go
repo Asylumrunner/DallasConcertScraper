@@ -19,6 +19,8 @@ const (
 )
 
 func scrape(url string) []show {
+  band_names := make([]show, 0)
+
   log.Print("Creating HTTP Client with a 30 second timeout")
   client := &http.Client{
     Timeout: 30 * time.Second,
@@ -26,15 +28,16 @@ func scrape(url string) []show {
 
   log.Print("Performing GET call on " + url)
   response, err := client.Get(url)
-  defer response.Body.Close()
   if err != nil {
-    log.Fatal(err)
+    log.Print(err)
+    return nil
   }
+  defer response.Body.Close()
+  
   body := make([]byte, 9999)
   response.Body.Read(body)
   log.Print(string(body))
 
-  band_names := make([]show, 0)
   tokenizer := html.NewTokenizer(response.Body)
   var data_expected information_type
 

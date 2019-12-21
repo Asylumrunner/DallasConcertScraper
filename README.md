@@ -8,19 +8,41 @@ AWS Lambda was a fairly obvious fit for this project. Concerts don't tend to jus
 
 Go as a language choice is somewhat artificial. Python could easily handle this task just as easily, if not more so, but I've been interested in Go and looking for an excuse to use it, and with Go's adoption as an officially-supported language for AWS Lambda in 2018, it doesn't seem too big a stretch.
 
-## Minimal Viable Product Checklist
-* Aggregate concert data from a set list (heh) of concert venues - Done!
-* Convert that concert data into a single, human-readable document - Done!
-* Store that document in an accessible location in S3 - Done!
+## Important Note
+This web scraper, like most, is extremely brittle, heavily dependent on the specific HTML and CSS styling used by the websites it scraped. When first created, this scraper primarily leveraged the fact that many of Dallas's concert venues appeared to have used the same web developer, resulting in CSS stylesheets that were nearly identical.
 
-## Pretty Nice-To-Haves
-* Email the document to myself once it's created - Done!
-* Allow for the easy addition of new venues
-* Allow for the prioritization of a list of bands I know and like
-* Provide some amount of description for bands on top of what the venue website has because those descriptions are generally garbage
+Since this project was completed, many of these venues have since redesigned their websites (which is a good thing, most of them were pretty bad, it's one of the reasons I made this thing in the first place), and as a result have temporarily broken my ability to scrape them. 
 
-## Stretch Features
-* Allow for completely venue-agnostic scraping, allowing the Lambda to scrape any concert website (Unlikely. Music venue websites are, bizarrely, a wasteland of web design)
-* Turn the monthly document into a web page (this isn't actually hard with S3's static hosting functionality, it's just not terribly useful at the moment)
-* Try and pull setlist data because I'm one of those people that likes to spoil myself on the setlist in advance
-* Add a YouTube and/or Spotify link to the band's posting so I can figure out what the hell they actually sound like - Done!
+Still, though, this project served as an interesting learning experience, and maybe as I move around I'll be able to reimplement it, so I'm leaving it around.
+
+## Installation Steps
+Prerequisites:
+* An Amazon Web Services Account
+* Ideally two, minimum one email address, registered to Amazon Simple Email Service
+* A client ID and secret for the Spotify API
+
+1.  From the root of this project, run the following command line instructions.
+```
+env GOOS-linux GOARCH=amd64 go build -i /tmp/main scraper
+//This builds the actual project binary
+zip -j main.zip /tmp/main
+//AWS Lambda mainly takes code in the form of zipped binaries, so you need to zip it up
+rm /tmp/main
+//Technically optional, I like to clean up the old binary
+```
+
+2. With the binary, create an AWS Lambda function and call it whatever ("DallasConcertScraper" is fine). Mark the language as Go 1.x. When given the option, select "Upload a .zip", upload the zip file created above, and save the function.
+
+3. In the Environment variables window, you're going to need to set environment variables with the following keys and values:
+```
+client_id - Your Spotify API client ID
+client_secret -  Your Spotify API client secret
+dest_email - The email address you want the scraped report sent to
+send_email - The email address you want to send the scraped report from. This can be the same as dest_email, but most email clients will flag this as potential fraud
+```
+
+4. Create a file called venues.txt, containing every venue URL you want to scrape as a comma separated list, no spaces. Upload it to S3.
+
+5. This scraper is written to be triggered once a month by a Cloudwatch Event, which you can set up in the Lambda console. Alternatively, if you want to trigger this manually, you can set up a Test Event in the Lambda console with whatever payload (empty JSON object is what I use), so that you can run the function just by hitting "Test"
+
+

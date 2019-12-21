@@ -1,5 +1,11 @@
 package main
 
+import (
+	"github.com/araddon/dateparse"
+	"sort"
+	"log"
+)
+
 func RemoveInvalidValues(shows []show) (cleaned_shows []show) {
 	for _, s := range shows {
 		if len(s.headliner) < 200 {
@@ -25,6 +31,7 @@ func FormatScrapedData(shows []show) string {
 }
 
 func FormatIntoHTMLBody(shows []show) string {
+	log.Print(shows)
 	html_email_body := ""
 	html_email_body += "<h1>Band Details For Dallas Shows</h1>"
 	html_email_body += "<h2>Execution Details and Full Data Output Can Be Found In AWS</h2>"
@@ -40,6 +47,24 @@ func FormatIntoHTMLBody(shows []show) string {
 			html_email_body += ("<a href=\"" + single_show.spotify_url + "\">Spotify Link</a>")
 		}
 	}
-
+	log.Print(html_email_body)
 	return html_email_body
+}
+
+func SortByDate(shows []show) (converted_shows []show){
+	for _, single_show := range shows {
+		single_show.date = ConvertDateFormat(single_show.date)
+		converted_shows = append(converted_shows, single_show)
+	}
+	sort.Sort(ByDate(converted_shows))
+	return
+}
+
+func ConvertDateFormat(unconverted_date string) string {
+	t, err := dateparse.ParseAny(unconverted_date)
+	if err != nil {
+		return unconverted_date
+	} else {
+		return t.String()[:10]
+	}
 }

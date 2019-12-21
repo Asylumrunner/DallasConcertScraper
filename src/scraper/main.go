@@ -22,7 +22,10 @@ func getShows() []show {
   for _, venue := range venue_list {
     trimmed_venue = strings.TrimSpace(venue)
     log.Print("Scraping for " + trimmed_venue)
-    act_list = append(act_list, scrape(trimmed_venue)...)
+    scraped_acts := scrape(trimmed_venue)
+    if scraped_acts != nil {
+      act_list = append(act_list, scraped_acts...)
+    }
     log.Print("Scraping for " + trimmed_venue + " completed")
   }
   return act_list
@@ -48,6 +51,7 @@ func ScrapeAndParse() {
   shows := getShows()
   shows = RemoveInvalidValues(shows)
   shows = searchShowsOnSpotify(shows)
+  shows = SortByDate(shows)
   formatted_show_document := FormatScrapedData(shows)
   log.Print(formatted_show_document)
   uploaded_successfully := UploadToS3(formatted_show_document)

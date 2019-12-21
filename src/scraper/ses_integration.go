@@ -5,6 +5,7 @@ import (
     "github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ses"
 	"log"
+	"os"
 )
 
 func SendEmail(email_body string) bool {
@@ -13,7 +14,7 @@ func SendEmail(email_body string) bool {
 
 	input := &ses.SendEmailInput{
 		Destination: &ses.Destination{
-			ToAddresses: []*string{aws.String("asylumrunner@gmail.com")},
+			ToAddresses: []*string{aws.String(os.Getenv("dest_email"))},
 		},
 		Message: &ses.Message{
 			Body: &ses.Body{
@@ -25,9 +26,9 @@ func SendEmail(email_body string) bool {
 				Data: aws.String("Your Scraped Concert Information Is Ready"),
 			},
 		},
-		Source: aws.String("asylumrunner@gmail.com"),
+		Source: aws.String(os.Getenv("send_email")),
 		ReplyToAddresses: []*string{
-			aws.String("asylumrunner@gmail.com"),
+			aws.String(os.Getenv("send_email")),
 		},
 	}
 
